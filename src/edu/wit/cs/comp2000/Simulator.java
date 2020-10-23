@@ -1,5 +1,6 @@
 package edu.wit.cs.comp2000;
 
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -17,7 +18,7 @@ public class Simulator {
 		int numLines, maxItems, numCustomers;
 		double customerChance;
 
-
+		
 		try (Scanner s = new Scanner(System.in)) {
 
 			System.out.print("Enter number of lines (2 or greater): ");
@@ -43,8 +44,32 @@ public class Simulator {
 
 		GroceryLine sing = new SingleLine(numLines);
 		GroceryLine mult = new MultiLine(numLines);
-
-		// TODO: Implement simulation loop
+		
+		int counter = 0;
+		while((sing.hasCustomers() || counter<numCustomers) || (mult.hasCustomers() || counter<numCustomers)) {
+			Random randItems = new Random();
+			Random randPeople = new Random();
+			double checkLine = randPeople.nextDouble();
+			int numItems = randItems.nextInt(maxItems)+1;
+			if(sing.hasCustomers() || counter<numCustomers)
+			{
+				
+				sing.step();
+				if(checkLine<customerChance && counter<numCustomers)
+					{
+						sing.arrive(new Customer(numItems));
+					}
+			}
+			if(mult.hasCustomers() || counter<numCustomers)
+			{
+				mult.step();
+				if(checkLine<customerChance && counter<numCustomers)
+					{
+						mult.arrive(new Customer(numItems));
+					}
+			}
+			counter++;
+		}
 
 		Stats sstats = sing.getStats();
 		Stats mstats = mult.getStats();
@@ -63,8 +88,10 @@ public class Simulator {
 		double avgWaitTime = -1;
 		int maxQueueLength = -1;
 		double custPerHour = -1;
-
-		// TODO: Calculate statistics
+		
+		avgWaitTime = ((double) s.totalTime) / s.totalPeople;
+		maxQueueLength = s.maxLine;
+		custPerHour = (60/(((double)s.elapsedTime-ITEM_TIME)/60))*s.totalPeople;
 
 		System.out.printf("\nStatistics for %s:\nAverage wait time: %f\nMaximum queue length: %d\nCustomers per hour: %f\n",
 				lineName, avgWaitTime, maxQueueLength, custPerHour);
